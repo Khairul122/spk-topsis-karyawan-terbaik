@@ -112,13 +112,7 @@ session_start();
             <span>Anda belum login, silahkan login terlebih dahulu</span>
         </main>
     <?php
-    } else if ($_SESSION['status'] == 'pimpinan') {
-    ?>
-        <main class="container py-5">
-            <span>Hanya Admin yang dapat mengakses halaman ini</span>
-        </main>
-    <?php
-    } else if ($_SESSION['status'] == 'admin') {
+    } 
     ?>
         <main class="container py-5">
             <form class="card mb-3" method="post" action="tambah_kriteria.php">
@@ -261,7 +255,7 @@ session_start();
             </div>
         </main>
     <?php
-    }
+
     ?>
 
     <script src="assets/js/bootstrap.min.js"></script>

@@ -103,13 +103,7 @@ session_start();
         <span>Anda belum login, silahkan login terlebih dahulu</span>
     </main>
     <?php
-    } else if ($_SESSION['status'] == 'admin') {
-    ?>
-    <main class="container py-5">
-        <span>Hanya Pimpinan yang dapat mengakses halaman ini</span>
-    </main>
-    <?php
-    } else if ($_SESSION['status'] == "pimpinan") {
+    } else if ($_SESSION['status'] == "admin") {
     ?>
     <main class="container py-5">
         <center>

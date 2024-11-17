@@ -116,12 +116,6 @@ session_start();
     } else if ($_SESSION['status'] == 'admin') {
     ?>
         <main class="container py-5">
-            <span>Hanya Pimpinan yang dapat mengakses halaman ini</span>
-        </main>
-    <?php
-    } else if ($_SESSION['status'] == 'pimpinan') {
-    ?>
-        <main class="container py-5">
             <?php
             include('koneksi.php');
 
@@ -294,15 +288,10 @@ session_start();
                                     <th scope="col">No</th>
                                     <th scope="col">Nama</th>
                                     <?php
-
                                     $result = mysqli_query($conn, $sql);
-
                                     while ($row = mysqli_fetch_array($result)) {
-
                                     ?>
-
                                         <th scope="col"><?php echo $row['id']; ?></th>
-
                                     <?php
 
                                     }
@@ -550,7 +539,6 @@ session_start();
                         </table>
                     </div>
                 </div>
-
                 <div class="card mb-3">
                     <h2 class="card-header py-5 text-center">URUTAN PERINGKAT</h2>
                     <div class="card-body">
@@ -560,33 +548,39 @@ session_start();
                                     <th scope="col">No</th>
                                     <th scope="col">Nama</th>
                                     <th scope="col">Skor</th>
+                                    <th scope="col">Peringkat</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
+                                $skor_arr = array();
+                                foreach ($data as $key => $d) {
+                                    $skor = $s_w[$key] / ($s_w[$key] + $s_b[$key]);
+                                    $skor_arr[] = array('nama' => $d['nama'], 'skor' => $skor);
+                                }
+
+                                // Mengurutkan berdasarkan skor (desc)
+                                usort($skor_arr, function ($a, $b) {
+                                    return $b['skor'] <=> $a['skor'];
+                                });
+
                                 $i = 1;
-                                $skor_arr = array(
-                                    'nama' => array(),
-                                    'skor' => array()
-                                );
-                                foreach ($data as $d) {
-                                    $skor = $s_w[$i - 1] / ($s_w[$i - 1] + $s_b[$i - 1]);
-                                    array_push($skor_arr['nama'], $d['nama']);
-                                    array_push($skor_arr['skor'], $skor);
+                                foreach ($skor_arr as $item) {
                                 ?>
                                     <tr>
-                                        <th scope="row"><?php echo $i++ ?></th>
-                                        <td><?php echo $d['nama'] ?></td>
-                                        <td><?php echo $skor ?></td>
+                                        <th scope="row"><?php echo $i ?></th>
+                                        <td><?php echo $item['nama'] ?></td>
+                                        <td><?php echo $item['skor'] ?></td>
+                                        <td><?php echo $i++ ?></td>
                                     </tr>
                                 <?php
                                 }
-                                $_SESSION['skor'] = $skor_arr;
                                 ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
 
                 <a class="btn btn-danger" href="hapus_matriks.php"
                     onclick="return confirm('Apakah Anda yakin ingin menghapus seluruh data ini?')"><i
