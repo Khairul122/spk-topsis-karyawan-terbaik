@@ -15,7 +15,7 @@ session_start();
 <body class="bg-light">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-             <a class="navbar-brand" href="#"> 
+            <a class="navbar-brand" href="#">
                 SPK Pemilihan Karyawan Terbaik
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -47,49 +47,49 @@ session_start();
                 <?php
                 if (empty($_SESSION['status'])) {
                 ?>
-                <!-- Modal Button -->
-                <ul class="navbar-nav">
-                    <li>
-                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
-                            data-bs-target="#exampleModal">
-                            <i class="bi bi-box-arrow-in-left"></i> LOGIN
-                        </button>
-                    </li>
-                </ul>
-                <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">LOGIN</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                    <!-- Modal Button -->
+                    <ul class="navbar-nav">
+                        <li>
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal">
+                                <i class="bi bi-box-arrow-in-left"></i> LOGIN
+                            </button>
+                        </li>
+                    </ul>
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">LOGIN</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <form method="post" action="login.php">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label">Username</label>
+                                            <input class="form-control" name="username" type="text" />
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Password</label>
+                                            <input class="form-control" name="password" type="password" />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" name="login" class="btn btn-primary">Login</button>
+                                    </div>
+                                </form>
                             </div>
-                            <form method="post" action="login.php">
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label class="form-label">Username</label>
-                                        <input class="form-control" name="username" type="text" />
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Password</label>
-                                        <input class="form-control" name="password" type="password" />
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" name="login" class="btn btn-primary">Login</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
-                </div>
                 <?php
                 } else {
                 ?>
-                <a class="btn btn-danger" href="logout.php"><i class="bi bi-box-arrow-left"></i> LOGOUT</a>
+                    <a class="btn btn-danger" href="logout.php"><i class="bi bi-box-arrow-left"></i> LOGOUT</a>
                 <?php
                 }
                 ?>
@@ -99,54 +99,87 @@ session_start();
     <?php
     if (empty($_SESSION['status'])) {
     ?>
-    <main class="container py-5">
-        <span>Anda belum login, silahkan login terlebih dahulu</span>
-    </main>
-    <?php
+        <main class="container py-5">
+            <span>Anda belum login, silahkan login terlebih dahulu</span>
+        </main>
+        <?php
     } else if ($_SESSION['status'] == "admin") {
-    ?>
-    <main class="container py-5">
-        <center>
-            <div class="col-6">
-                <p>Berdasarkan hasil keputusan menggunakan SPK TOPSIS, didapatkan hasil bahwa alternatif dengan skor
-                    tertinggi jatuh kepada :</p>
-                <div class="card">
-                    <?php
-                        $hasil = $_SESSION['skor'];
-                        $skor = $hasil['skor'];
-                        $i_best = array_keys($skor, max($skor))[0];
-                        ?>
-                    <form action="buat_surat.php" method="post">
-                        <div class="card-header">
-                            <h2><?php echo $hasil['nama'][$i_best]; ?></h2>
-                            <input type="hidden" name="nama" value="<?php echo $hasil['nama'][$i_best]; ?>" />
-                        </div>
-                        <div class="card-body">
-                            <span>Skor :</span>
-                            <h2><?php echo $skor[$i_best]; ?></h2>
-                            <input type="hidden" name="skor" value="<?php echo $skor[$i_best]; ?>" />
-                        </div>
-                        <div class="card-footer">
-                            <center>
-                                <div class="mb-3">
-                                    <input class="form-control" name="nomor" type="text"
-                                        placeholder="Masukkan nomor surat" />
-                                </div>
-                                <div class="mb-3">
-                                    <input class="form-control" name="periode" type="text"
-                                        placeholder="Masukkan periode pegawai terbaik" />
-                                </div>
-
-                                <button type="submit" name="download" class="btn btn-primary">Unduh Surat
-                                    Keputusan</button>
-                            </center>
-                        </div>
-                    </form>
+        // Tambahkan pengecekan session skor
+        if (!isset($_SESSION['skor']) || empty($_SESSION['skor'])) {
+        ?>
+            <main class="container py-5">
+                <div class="alert alert-warning" role="alert">
+                    Data skor belum tersedia. Silahkan lakukan perhitungan terlebih dahulu.
                 </div>
-            </div>
-        </center>
-    </main>
+            </main>
+        <?php
+        } else {
+        ?>
+            <main class="container py-5">
+                <center>
+                    <div class="col-6">
+                        <p>Berdasarkan hasil keputusan menggunakan SPK TOPSIS, didapatkan hasil bahwa alternatif dengan skor
+                            tertinggi jatuh kepada :</p>
+                        <div class="card">
+                            <?php
+                            $hasil = $_SESSION['skor'];
+
+                            // Pastikan array skor ada dan memiliki data
+                            if (isset($hasil['skor']) && is_array($hasil['skor']) && !empty($hasil['skor'])) {
+                                $skor = $hasil['skor'];
+                                $i_best = array_keys($skor, max($skor))[0];
+
+                                // Pastikan nama dan skor tersedia untuk indeks terpilih
+                                if (isset($hasil['nama'][$i_best]) && isset($skor[$i_best])) {
+                            ?>
+                                    <form action="buat_surat.php" method="post">
+                                        <div class="card-header">
+                                            <h2><?php echo htmlspecialchars($hasil['nama'][$i_best]); ?></h2>
+                                            <input type="hidden" name="nama" value="<?php echo htmlspecialchars($hasil['nama'][$i_best]); ?>" />
+                                        </div>
+                                        <div class="card-body">
+                                            <span>Skor :</span>
+                                            <h2><?php echo htmlspecialchars($skor[$i_best]); ?></h2>
+                                            <input type="hidden" name="skor" value="<?php echo htmlspecialchars($skor[$i_best]); ?>" />
+                                        </div>
+                                        <div class="card-footer">
+                                            <center>
+                                                <div class="mb-3">
+                                                    <input class="form-control" name="nomor" type="text"
+                                                        placeholder="Masukkan nomor surat" required />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <input class="form-control" name="periode" type="text"
+                                                        placeholder="Masukkan periode pegawai terbaik" required />
+                                                </div>
+
+                                                <button type="submit" name="download" class="btn btn-primary">Unduh Surat
+                                                    Keputusan</button>
+                                            </center>
+                                        </div>
+                                    </form>
+                                <?php
+                                } else {
+                                ?>
+                                    <div class="alert alert-danger">
+                                        Data hasil perhitungan tidak lengkap.
+                                    </div>
+                                <?php
+                                }
+                            } else {
+                                ?>
+                                <div class="alert alert-danger">
+                                    Data skor tidak valid atau kosong.
+                                </div>
+                            <?php
+                            }
+                            ?>
+                        </div>
+                    </div>
+                </center>
+            </main>
     <?php
+        }
     }
     ?>
     <script src="assets/js/bootstrap.min.js"></script>

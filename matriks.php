@@ -257,6 +257,7 @@ session_start();
                 </div>
 
                 <?php
+                // Hitung jumlah kuadrat
                 $suma = array();
                 foreach ($matriks as $r) {
                     $tmp_suma = array();
@@ -265,8 +266,6 @@ session_start();
                     }
                     array_push($suma, $tmp_suma);
                 }
-                // print_r($suma);
-                echo '<br/>';
 
                 $sumb = array();
                 foreach ($suma as $row) {
@@ -274,9 +273,6 @@ session_start();
                         $sumb[$i] = isset($sumb[$i]) ? $sumb[$i] + $val : $val;
                     }
                 }
-
-                // print_r($sumb);
-
                 ?>
 
                 <div class="card mb-3">
@@ -293,42 +289,34 @@ session_start();
                                     ?>
                                         <th scope="col"><?php echo $row['id']; ?></th>
                                     <?php
-
                                     }
-
                                     ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-
+                                // Ambil data sekali saja
                                 $result = mysqli_query($conn, $sql_t);
+                                $data = array();
+                                while ($row = mysqli_fetch_array($result)) {
+                                    $data[] = $row;
+                                }
 
-                                for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
-
-                                    $sum_k = 0;
-                                    $data = array();
-                                    while ($row_k = mysqli_fetch_array($result)) {
-                                        $sum_k = $sum_k + pow($row_k['K' . $j], 2);
-                                        $data[] = $row_k;
-                                    }
-
-                                    $i = 1;
-                                    foreach ($data as $d) {
+                                $i = 1;
+                                foreach ($data as $d) {
                                 ?>
-                                        <tr>
-                                            <th scope="row"><?php echo $i++ ?></th>
-                                            <td><?php echo $d['nama'] ?></td>
-                                            <?php
-                                            for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
-                                            ?>
-                                                <td><?php echo $d['K' . $j] / sqrt($sumb[$j - 1]) ?></td>
-                                            <?php
-                                            }
-                                            ?>
-                                        </tr>
+                                    <tr>
+                                        <th scope="row"><?php echo $i++ ?></th>
+                                        <td><?php echo $d['nama'] ?></td>
+                                        <?php
+                                        for ($k = 1; $k <= $_SESSION['num_rows']; $k++) {
+                                            // Tampilkan hasil tanpa pembulatan
+                                            $normalized = $d['K' . $k] / sqrt($sumb[$k - 1]);
+                                            echo "<td>" . $normalized . "</td>";
+                                        }
+                                        ?>
+                                    </tr>
                                 <?php
-                                    }
                                 }
                                 ?>
                             </tbody>
@@ -580,14 +568,11 @@ session_start();
                         </table>
                     </div>
                 </div>
-
-
                 <a class="btn btn-danger" href="hapus_matriks.php"
                     onclick="return confirm('Apakah Anda yakin ingin menghapus seluruh data ini?')"><i
                         class="bi bi-trash-fill"></i> Hapus Seluruh Data</a>
             <?php
             }
-
             ?>
         </main>
     <?php
