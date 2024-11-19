@@ -98,90 +98,66 @@ session_start();
     </nav>
     <?php
     if (empty($_SESSION['status'])) {
-    ?>
+?>
         <main class="container py-5">
             <span>Anda belum login, silahkan login terlebih dahulu</span>
         </main>
-        <?php
+<?php
     } else if ($_SESSION['status'] == "admin") {
-        // Tambahkan pengecekan session skor
         if (!isset($_SESSION['skor']) || empty($_SESSION['skor'])) {
-        ?>
+?>
             <main class="container py-5">
                 <div class="alert alert-warning" role="alert">
                     Data skor belum tersedia. Silahkan lakukan perhitungan terlebih dahulu.
                 </div>
             </main>
-        <?php
+<?php
         } else {
-        ?>
+            $hasil = $_SESSION['skor'];
+            
+            // Ambil nilai tertinggi 
+            $max_skor = max($hasil['skor']);
+            $max_index = array_search($max_skor, $hasil['skor']);
+            $nama_terbaik = $hasil['nama'][$max_index];
+?>
             <main class="container py-5">
                 <center>
                     <div class="col-6">
                         <p>Berdasarkan hasil keputusan menggunakan SPK TOPSIS, didapatkan hasil bahwa alternatif dengan skor
                             tertinggi jatuh kepada :</p>
                         <div class="card">
-                            <?php
-                            $hasil = $_SESSION['skor'];
-
-                            // Pastikan array skor ada dan memiliki data
-                            if (isset($hasil['skor']) && is_array($hasil['skor']) && !empty($hasil['skor'])) {
-                                $skor = $hasil['skor'];
-                                $i_best = array_keys($skor, max($skor))[0];
-
-                                // Pastikan nama dan skor tersedia untuk indeks terpilih
-                                if (isset($hasil['nama'][$i_best]) && isset($skor[$i_best])) {
-                            ?>
-                                    <form action="buat_surat.php" method="post">
-                                        <div class="card-header">
-                                            <h2><?php echo htmlspecialchars($hasil['nama'][$i_best]); ?></h2>
-                                            <input type="hidden" name="nama" value="<?php echo htmlspecialchars($hasil['nama'][$i_best]); ?>" />
-                                        </div>
-                                        <div class="card-body">
-                                            <span>Skor :</span>
-                                            <h2><?php echo htmlspecialchars($skor[$i_best]); ?></h2>
-                                            <input type="hidden" name="skor" value="<?php echo htmlspecialchars($skor[$i_best]); ?>" />
-                                        </div>
-                                        <div class="card-footer">
-                                            <center>
-                                                <div class="mb-3">
-                                                    <input class="form-control" name="nomor" type="text"
-                                                        placeholder="Masukkan nomor surat" required />
-                                                </div>
-                                                <div class="mb-3">
-                                                    <input class="form-control" name="periode" type="text"
-                                                        placeholder="Masukkan periode pegawai terbaik" required />
-                                                </div>
-
-                                                <button type="submit" name="download" class="btn btn-primary">Unduh Surat
-                                                    Keputusan</button>
-                                            </center>
-                                        </div>
-                                    </form>
-                                <?php
-                                } else {
-                                ?>
-                                    <div class="alert alert-danger">
-                                        Data hasil perhitungan tidak lengkap.
-                                    </div>
-                                <?php
-                                }
-                            } else {
-                                ?>
-                                <div class="alert alert-danger">
-                                    Data skor tidak valid atau kosong.
+                            <form action="buat_surat.php" method="post">
+                                <div class="card-header">
+                                    <h2><?php echo htmlspecialchars($nama_terbaik); ?></h2>
+                                    <input type="hidden" name="nama" value="<?php echo htmlspecialchars($nama_terbaik); ?>" />
                                 </div>
-                            <?php
-                            }
-                            ?>
+                                <div class="card-body">
+                                    <span>Skor :</span>
+                                    <h2><?php echo $max_skor; ?></h2>
+                                    <input type="hidden" name="skor" value="<?php echo htmlspecialchars($max_skor); ?>" />
+                                </div>
+                                <div class="card-footer">
+                                    <center>
+                                        <div class="mb-3">
+                                            <input class="form-control" name="nomor" type="text"
+                                                placeholder="Masukkan nomor surat" required />
+                                        </div>
+                                        <div class="mb-3">
+                                            <input class="form-control" name="periode" type="text"
+                                                placeholder="Masukkan periode pegawai terbaik" required />
+                                        </div>
+                                        <button type="submit" name="download" class="btn btn-primary">Unduh Surat Keputusan</button>
+                                    </center>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </center>
             </main>
-    <?php
+<?php
         }
     }
-    ?>
+?>
     <script src="assets/js/bootstrap.min.js"></script>
 </body>
 
