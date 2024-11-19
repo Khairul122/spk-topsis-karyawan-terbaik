@@ -527,6 +527,8 @@ session_start();
                         </table>
                     </div>
                 </div>
+
+
                 <div class="card mb-3">
                     <h2 class="card-header py-5 text-center">URUTAN PERINGKAT</h2>
                     <div class="card-body">
@@ -551,6 +553,12 @@ session_start();
                                 usort($skor_arr, function ($a, $b) {
                                     return $b['skor'] <=> $a['skor'];
                                 });
+
+                                // Menyimpan data ke session
+                                $_SESSION['skor'] = array(
+                                    'nama' => array_column($skor_arr, 'nama'),
+                                    'skor' => array_column($skor_arr, 'skor')
+                                );
 
                                 $i = 1;
                                 foreach ($skor_arr as $item) {
