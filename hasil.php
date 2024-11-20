@@ -98,28 +98,28 @@ session_start();
     </nav>
     <?php
     if (empty($_SESSION['status'])) {
-?>
+    ?>
         <main class="container py-5">
             <span>Anda belum login, silahkan login terlebih dahulu</span>
         </main>
-<?php
+        <?php
     } else if ($_SESSION['status'] == "admin") {
         if (!isset($_SESSION['skor']) || empty($_SESSION['skor'])) {
-?>
+        ?>
             <main class="container py-5">
                 <div class="alert alert-warning" role="alert">
                     Data skor belum tersedia. Silahkan lakukan perhitungan terlebih dahulu.
                 </div>
             </main>
-<?php
+        <?php
         } else {
             $hasil = $_SESSION['skor'];
-            
+
             // Ambil nilai tertinggi 
             $max_skor = max($hasil['skor']);
             $max_index = array_search($max_skor, $hasil['skor']);
             $nama_terbaik = $hasil['nama'][$max_index];
-?>
+        ?>
             <main class="container py-5">
                 <center>
                     <div class="col-6">
@@ -154,10 +154,10 @@ session_start();
                     </div>
                 </center>
             </main>
-<?php
+    <?php
         }
     }
-?>
+    ?>
     <script src="assets/js/bootstrap.min.js"></script>
 </body>
 
