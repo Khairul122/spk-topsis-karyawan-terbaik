@@ -24,7 +24,7 @@ session_start();
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
             <a class="navbar-brand" href="#">
-                SPK Pemilihan Karyawan Terbaik
+                SPK Pemilihan Pegawai Terbaik
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
@@ -107,13 +107,14 @@ session_start();
     </nav>
 
     <?php
+    // Periksa status sesi login
     if (empty($_SESSION['status'])) {
     ?>
         <main class="container py-5">
             <span>Anda belum login, silahkan login terlebih dahulu</span>
         </main>
     <?php
-    } else if ($_SESSION['status'] == 'admin') {
+    } else if ($_SESSION['status'] == 'pimpinan' || $_SESSION['status'] == 'admin') {
     ?>
         <main class="container py-5">
             <?php
@@ -257,7 +258,6 @@ session_start();
                 </div>
 
                 <?php
-                // Hitung jumlah kuadrat
                 $suma = array();
                 foreach ($matriks as $r) {
                     $tmp_suma = array();
@@ -266,6 +266,8 @@ session_start();
                     }
                     array_push($suma, $tmp_suma);
                 }
+                // print_r($suma);
+                echo '<br/>';
 
                 $sumb = array();
                 foreach ($suma as $row) {
@@ -273,6 +275,9 @@ session_start();
                         $sumb[$i] = isset($sumb[$i]) ? $sumb[$i] + $val : $val;
                     }
                 }
+
+                // print_r($sumb);
+
                 ?>
 
                 <div class="card mb-3">
@@ -284,39 +289,52 @@ session_start();
                                     <th scope="col">No</th>
                                     <th scope="col">Nama</th>
                                     <?php
+
                                     $result = mysqli_query($conn, $sql);
+
                                     while ($row = mysqli_fetch_array($result)) {
+
                                     ?>
+
                                         <th scope="col"><?php echo $row['id']; ?></th>
+
                                     <?php
+
                                     }
+
                                     ?>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                // Ambil data sekali saja
-                                $result = mysqli_query($conn, $sql_t);
-                                $data = array();
-                                while ($row = mysqli_fetch_array($result)) {
-                                    $data[] = $row;
-                                }
 
-                                $i = 1;
-                                foreach ($data as $d) {
+                                $result = mysqli_query($conn, $sql_t);
+
+                                for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
+
+                                    $sum_k = 0;
+                                    $data = array();
+                                    while ($row_k = mysqli_fetch_array($result)) {
+                                        $sum_k = $sum_k + pow($row_k['K' . $j], 2);
+                                        $data[] = $row_k;
+                                    }
+
+                                    $i = 1;
+                                    foreach ($data as $d) {
                                 ?>
-                                    <tr>
-                                        <th scope="row"><?php echo $i++ ?></th>
-                                        <td><?php echo $d['nama'] ?></td>
-                                        <?php
-                                        for ($k = 1; $k <= $_SESSION['num_rows']; $k++) {
-                                            // Tampilkan hasil tanpa pembulatan
-                                            $normalized = $d['K' . $k] / sqrt($sumb[$k - 1]);
-                                            echo "<td>" . $normalized . "</td>";
-                                        }
-                                        ?>
-                                    </tr>
+                                        <tr>
+                                            <th scope="row"><?php echo $i++ ?></th>
+                                            <td><?php echo $d['nama'] ?></td>
+                                            <?php
+                                            for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
+                                            ?>
+                                                <td><?php echo $d['K' . $j] / sqrt($sumb[$j - 1]) ?></td>
+                                            <?php
+                                            }
+                                            ?>
+                                        </tr>
                                 <?php
+                                    }
                                 }
                                 ?>
                             </tbody>
@@ -528,59 +546,67 @@ session_start();
                     </div>
                 </div>
 
-
                 <div class="card mb-3">
                     <h2 class="card-header py-5 text-center">URUTAN PERINGKAT</h2>
                     <div class="card-body">
                         <table id="peringkat" class="table nowrap" style="width: 100%;">
                             <thead>
                                 <tr>
-                                    <th scope="col">No</th>
+                                    <th scope="col">Peringkat</th>
                                     <th scope="col">Nama</th>
                                     <th scope="col">Skor</th>
-                                    <th scope="col">Peringkat</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php
-                                $skor_arr = array();
-                                foreach ($data as $key => $d) {
-                                    $skor = $s_w[$key] / ($s_w[$key] + $s_b[$key]);
-                                    $skor_arr[] = array('nama' => $d['nama'], 'skor' => $skor);
-                                }
-
-                                // Mengurutkan berdasarkan skor (desc)
-                                usort($skor_arr, function ($a, $b) {
-                                    return $b['skor'] <=> $a['skor'];
-                                });
-
-                                // Menyimpan data ke session
-                                $_SESSION['skor'] = array(
-                                    'nama' => array_column($skor_arr, 'nama'),
-                                    'skor' => array_column($skor_arr, 'skor')
+                                // Menyiapkan array untuk menyimpan data skor
+                                $skor_arr = array(
+                                    'nama' => array(),
+                                    'skor' => array()
                                 );
 
-                                $i = 1;
-                                foreach ($skor_arr as $item) {
+                                // Mengumpulkan data skor
+                                $data_lengkap = array();
+                                $i = 0;
+                                foreach ($data as $d) {
+                                    $skor = $s_w[$i] / ($s_w[$i] + $s_b[$i]);
+                                    $data_lengkap[] = array(
+                                        'nama' => $d['nama'],
+                                        'skor' => $skor
+                                    );
+                                    array_push($skor_arr['nama'], $d['nama']);
+                                    array_push($skor_arr['skor'], $skor);
+                                    $i++;
+                                }
+
+                                usort($data_lengkap, function ($a, $b) {
+                                    return $a['skor'] <= $b['skor'];
+                                });
+
+                                // Menampilkan data yang sudah diurutkan
+                                foreach ($data_lengkap as $key => $value) {
+                                    $peringkat = $key + 1;
                                 ?>
                                     <tr>
-                                        <th scope="row"><?php echo $i ?></th>
-                                        <td><?php echo $item['nama'] ?></td>
-                                        <td><?php echo $item['skor'] ?></td>
-                                        <td><?php echo $i++ ?></td>
+                                        <th scope="row"><?php echo $peringkat ?></th>
+                                        <td><?php echo $value['nama'] ?></td>
+                                        <td><?php echo $value['skor'] ?></td>
                                     </tr>
                                 <?php
                                 }
+                                $_SESSION['skor'] = $skor_arr;
                                 ?>
                             </tbody>
                         </table>
                     </div>
                 </div>
+
                 <a class="btn btn-danger" href="hapus_matriks.php"
                     onclick="return confirm('Apakah Anda yakin ingin menghapus seluruh data ini?')"><i
                         class="bi bi-trash-fill"></i> Hapus Seluruh Data</a>
             <?php
             }
+
             ?>
         </main>
     <?php
