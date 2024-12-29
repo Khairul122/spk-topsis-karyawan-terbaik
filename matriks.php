@@ -275,189 +275,173 @@ session_start();
                         $sumb[$i] = isset($sumb[$i]) ? $sumb[$i] + $val : $val;
                     }
                 }
-
-                // print_r($sumb);
-
                 ?>
 
                 <div class="card mb-3">
                     <h2 class="card-header py-5 text-center">MATRIKS TERNORMALISASI</h2>
                     <div class="card-body">
-                        <table class="table nowrap" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th scope="col">No</th>
-                                    <th scope="col">Nama</th>
+                        <?php
+                        // Prepare statements untuk mengurangi resiko SQL injection
+                        $stmt_kriteria = $conn->prepare($sql);
+                        $stmt_alternatif = $conn->prepare($sql_t);
+
+                        // Fungsi untuk menghitung normalisasi
+                        function hitungNormalisasi($nilai, $pembagi)
+                        {
+                            return number_format($nilai / sqrt($pembagi), 8);
+                        }
+
+                        // Fetch semua data kriteria sekali saja
+                        $kriteria = [];
+                        if ($stmt_kriteria->execute()) {
+                            $result_kriteria = $stmt_kriteria->get_result();
+                            while ($row = $result_kriteria->fetch_assoc()) {
+                                $kriteria[] = $row;
+                            }
+                        }
+
+                        // Fetch semua data alternatif sekali saja
+                        $alternatif = [];
+                        if ($stmt_alternatif->execute()) {
+                            $result_alternatif = $stmt_alternatif->get_result();
+                            while ($row = $result_alternatif->fetch_assoc()) {
+                                $alternatif[] = $row;
+                            }
+                        }
+                        ?>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <?php foreach ($kriteria as $k): ?>
+                                            <th><?= htmlspecialchars($k['id']) ?></th>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     <?php
-
-                                    $result = mysqli_query($conn, $sql);
-
-                                    while ($row = mysqli_fetch_array($result)) {
-
+                                    foreach ($alternatif as $index => $alt):
+                                        $nomor = $index + 1;
                                     ?>
-
-                                        <th scope="col"><?php echo $row['id']; ?></th>
-
-                                    <?php
-
-                                    }
-
-                                    ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-
-                                $result = mysqli_query($conn, $sql_t);
-
-                                for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
-
-                                    $sum_k = 0;
-                                    $data = array();
-                                    while ($row_k = mysqli_fetch_array($result)) {
-                                        $sum_k = $sum_k + pow($row_k['K' . $j], 2);
-                                        $data[] = $row_k;
-                                    }
-
-                                    $i = 1;
-                                    foreach ($data as $d) {
-                                ?>
                                         <tr>
-                                            <th scope="row"><?php echo $i++ ?></th>
-                                            <td><?php echo $d['nama'] ?></td>
+                                            <th><?= $nomor ?></th>
+                                            <td><?= htmlspecialchars($alt['nama']) ?></td>
                                             <?php
-                                            for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
+                                            for ($k = 1; $k <= $_SESSION['num_rows']; $k++):
+                                                $nilai_normalisasi = hitungNormalisasi($alt['K' . $k], $sumb[$k - 1]);
                                             ?>
-                                                <td><?php echo $d['K' . $j] / sqrt($sumb[$j - 1]) ?></td>
-                                            <?php
-                                            }
-                                            ?>
+                                                <td><?= $nilai_normalisasi ?></td>
+                                            <?php endfor; ?>
                                         </tr>
-                                <?php
-                                    }
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card mb-3">
                     <h2 class="card-header py-5 text-center">MATRIKS TERBOBOT</h2>
                     <div class="card-body">
-                        <table class="table nowrap" style="width: 100%;">
-                            <thead>
-                                <tr>
-                                    <th scope="col">No</th>
-                                    <th scope="col">Nama</th>
+                        <?php
+                        // Prepare statements
+                        $stmt_kriteria = $conn->prepare($sql);
+                        $stmt_alternatif = $conn->prepare($sql_t);
+
+                        // Inisialisasi array
+                        $matriks_terbobot = [];
+                        $a_w = [];  // Solusi ideal negatif
+                        $a_b = [];  // Solusi ideal positif
+
+                        // Fungsi untuk membulatkan nilai
+                        function formatDecimal($value)
+                        {
+                            return number_format($value, 7, '.', '');
+                        }
+
+                        // Fetch data kriteria
+                        $kriteria = [];
+                        if ($stmt_kriteria->execute()) {
+                            $result_kriteria = $stmt_kriteria->get_result();
+                            while ($row = $result_kriteria->fetch_assoc()) {
+                                $kriteria[] = $row;
+                            }
+                        }
+
+                        // Fetch data alternatif
+                        $alternatif = [];
+                        if ($stmt_alternatif->execute()) {
+                            $result_alternatif = $stmt_alternatif->get_result();
+                            while ($row = $result_alternatif->fetch_assoc()) {
+                                $alternatif[] = $row;
+                            }
+                        }
+                        ?>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <?php foreach ($kriteria as $k): ?>
+                                            <th><?= htmlspecialchars($k['id']) ?></th>
+                                        <?php endforeach; ?>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     <?php
-
-                                    $result = mysqli_query($conn, $sql);
-
-                                    while ($row = mysqli_fetch_array($result)) {
-
+                                    // Hitung matriks terbobot
+                                    foreach ($alternatif as $index => $alt):
+                                        $tmp_matriks_terbobot = [];
                                     ?>
-
-                                        <th scope="col"><?php echo $row['id']; ?></th>
-
-                                    <?php
-
-                                    }
-
-                                    ?>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-
-                                $result = mysqli_query($conn, $sql_t);
-
-                                $a_w = array();
-                                $a_b = array();
-
-                                $matriks_terbobot = array();
-
-                                for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
-
-                                    $sum_k = 0;
-                                    $data = array();
-                                    while ($row_k = mysqli_fetch_array($result)) {
-                                        $sum_k = $sum_k + pow($row_k['K' . $j], 2);
-                                        $data[] = $row_k;
-                                    }
-
-                                    $i = 1;
-                                    foreach ($data as $d) {
-                                ?>
                                         <tr>
-                                            <th scope="row"><?php echo $i++ ?></th>
-                                            <td><?php echo $d['nama'] ?></td>
+                                            <th><?= $index + 1 ?></th>
+                                            <td><?= htmlspecialchars($alt['nama']) ?></td>
                                             <?php
-                                            $tmp_matriks_terbobot = array();
-                                            for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
-                                                $row = ($d['K' . $j] / sqrt($sumb[$j - 1])) * $bobot[$j - 1];
-                                                array_push($tmp_matriks_terbobot, $row);
+                                            for ($j = 1; $j <= $_SESSION['num_rows']; $j++):
+                                                // Hitung nilai terbobot
+                                                $nilai_terbobot = ($alt['K' . $j] / sqrt($sumb[$j - 1])) * $bobot[$j - 1];
+                                                $nilai_terbobot_formatted = formatDecimal($nilai_terbobot);
+                                                $tmp_matriks_terbobot[] = $nilai_terbobot;
                                             ?>
-                                                <td><?php echo $row; ?></td>
+                                                <td><?= $nilai_terbobot_formatted ?></td>
                                             <?php
-                                            }
-                                            array_push($matriks_terbobot, $tmp_matriks_terbobot);
+                                            endfor;
+                                            $matriks_terbobot[] = $tmp_matriks_terbobot;
                                             ?>
                                         </tr>
-                                <?php
-                                    }
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <?php
+                // Transpose matriks terbobot untuk memudahkan pencarian min/max per kriteria
+                $t_matriks_terbobot = array_map(null, ...$matriks_terbobot);
 
-                $rows = count($matriks_terbobot);
-                $ridx = 0;
-                $cidx = 0;
+                // Hitung solusi ideal positif (A+) dan negatif (A-)
+                for ($j = 0; $j < $_SESSION['num_rows']; $j++) {
+                    $kolom = $t_matriks_terbobot[$j];
 
-                // print_r($matriks_terbobot);
-
-                $t_matriks_terbobot = array();
-
-                foreach ($matriks_terbobot as $key => $subarr) {
-                    foreach ($subarr as $subkey => $subvalue) {
-                        $t_matriks_terbobot[$subkey][$key] = $subvalue;
+                    if ($jenis[$j] === 'benefit') {
+                        $a_w[] = formatDecimal(min($kolom));  // A- untuk benefit
+                        $a_b[] = formatDecimal(max($kolom));  // A+ untuk benefit
+                    } else {  // cost
+                        $a_w[] = formatDecimal(max($kolom));  // A- untuk cost
+                        $a_b[] = formatDecimal(min($kolom));  // A+ untuk cost
                     }
                 }
-
-                // echo '<br/><br/>';
-
-                // print_r($out);
-
-                // foreach ($matriks_terbobot as $rowidx => $row) {
-                //     foreach ($row as $colidx => $val) {
-                //         $t_matriks_terbobot[$ridx][$cidx] = $val;
-                //         $ridx++;
-                //         if ($ridx >= $rows) {
-                //             $cidx++;
-                //             $ridx = 0;
-                //         }
-                //     }
-                // }
-
-                // print_r($t_matriks_terbobot);
-
-                for ($j = 1; $j <= $_SESSION['num_rows']; $j++) {
-                    if ($jenis[$j - 1] == 'benefit') {
-                        array_push($a_w, min($t_matriks_terbobot[$j - 1]));
-                        array_push($a_b, max($t_matriks_terbobot[$j - 1]));
-                    } else if ($jenis[$j - 1] == 'cost') {
-                        array_push($a_w, max($t_matriks_terbobot[$j - 1]));
-                        array_push($a_b, min($t_matriks_terbobot[$j - 1]));
-                    }
-                }
-
-
+                $_SESSION['matriks_terbobot'] = $matriks_terbobot;
+                $_SESSION['a_plus'] = $a_b;
+                $_SESSION['a_minus'] = $a_w;
                 ?>
+
                 <div class="card mb-3">
                     <h2 class="card-header py-5 text-center">SOLUSI ALTERNATIF</h2>
                     <div class="card-body">
